@@ -1,0 +1,34 @@
+.github/workflows/windows-build.yml
+name: Build MCE & Launcher
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure with CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build MCE
+        run: cmake --build build --config Release -- /m:1
+
+      - name: Compile Launcher
+        run: cl launcher.c /O2 /nologo /link /SUBSYSTEM:WINDOWS /OUT:LaunchMCE.exe
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: MCE-Windows
+          path: |
+            build/Release/MCE.exe
+            LaunchMCE.exe
+Add Windows build workflow
